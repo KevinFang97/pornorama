@@ -85,8 +85,10 @@ def maximum_spanning_tree(graph):
             return True
 
     def find(id):
-        while farther_node[id] != id:
+        if farther_node[id] != id:
             return find(farther_node[id])
+        else:
+            return id
 
     connection_list = []
     added_set = set()
