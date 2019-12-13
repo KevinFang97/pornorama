@@ -171,7 +171,7 @@ if __name__ == '__main__':
 	#out=cv2.flip(out,flipCode=1)
 
 	img_list = [img_color1, img_color2, img_color3, img_color4, img_color5, img_color6, img_color7, img_color8]
-	kp_list, feature_list = extract_ORB(img_list)
+	kp_list, feature_list = extract_sift(img_list)
 
     '''
 	kp1 = kp_list[0]
