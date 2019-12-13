@@ -21,12 +21,33 @@ def extract_sift(image_list:List[np.ndarray]):
 
     return kp_list, feature_list
 
+
+def extract_ORB(image_list:List[np.ndarray]):
+    orb = cv2.ORB_create()
+    kp_list = []
+    feature_list = []
+    for each_image in image_list:
+        if each_image.shape[2] != 1:
+            img_gray = cv2.cvtColor(each_image, cv2.COLOR_BGR2GRAY)
+        else:
+            img_gray = each_image
+
+      #  kp = orb.detect(img_gray, None)
+        kp, descriptor = orb.detectAndCompute(img_gray, None)
+        kp_list.append(kp)
+        feature_list.append(descriptor)
+
+    return kp_list, feature_list
+
 '''
 return sets of feature matchees if there are multiple panoramas
 '''
-def feature_match(feature_list, threshold=50):
+def feature_match(feature_list, threshold=50, SIFT=True):
     match_dic = {}
-    bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)
+    if SIFT:
+        bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)
+    else:
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
 
     num_images = len(feature_list)
     graph = defaultdict(dict)
@@ -120,6 +141,8 @@ def maximum_spanning_tree(graph):
 
 img_path1 = '/home/han/gitlab/CMU16720/HW2/HW2/data/adobe_panoramas/data/fishbowl/fishbowl-00.png'
 img_path2 = '/home/han/gitlab/CMU16720/HW2/HW2/data/adobe_panoramas/data/fishbowl/fishbowl-01.png'
+
+'''
 img_path3 = '/home/han/gitlab/CMU16720/HW2/HW2/data/adobe_panoramas/data/fishbowl/fishbowl-02.png'
 img_path4 = '/home/han/gitlab/CMU16720/HW2/HW2/data/adobe_panoramas/data/fishbowl/fishbowl-03.png'
 
@@ -127,22 +150,53 @@ img_path5 = '/home/han/gitlab/CMU16720/HW2/HW2/data/adobe_panoramas/data/halfdom
 img_path6 = '/home/han/gitlab/CMU16720/HW2/HW2/data/adobe_panoramas/data/halfdome/halfdome-01.png'
 img_path7 = '/home/han/gitlab/CMU16720/HW2/HW2/data/adobe_panoramas/data/halfdome/halfdome-02.png'
 img_path8 = '/home/han/gitlab/CMU16720/HW2/HW2/data/adobe_panoramas/data/halfdome/halfdome-03.png'
-
+'''
 img_color1 = cv2.imread(img_path1)
 img_color2 = cv2.imread(img_path2)
+'''
 img_color3 = cv2.imread(img_path3)
 img_color4 = cv2.imread(img_path4)
 img_color5 = cv2.imread(img_path5)
 img_color6 = cv2.imread(img_path6)
 img_color7 = cv2.imread(img_path7)
 img_color8 = cv2.imread(img_path8)
+'''
 
-img_list = [img_color1, img_color2, img_color3, img_color4, img_color5, img_color6, img_color7, img_color8]
-kp_list, feature_list = extract_sift(img_list)
-result, match_dic = feature_match(feature_list)
+height, width,_ = img_color2.shape
+img_color2 = cv2.resize(img_color2, (int(width/2), int(height/2)))
+img_color2 = cv2.transpose(img_color2)
+img_color2 = cv2.flip(img_color2,flipCode=0)
+
+# rotate cw
+##out=cv2.transpose(img_color2)
+#out=cv2.flip(out,flipCode=1)
+
+
+img_list = [img_color1, img_color2] #, img_color3, img_color4, img_color5, img_color6, img_color7, img_color8]
+
+
+
+kp_list, feature_list = extract_ORB(img_list)
+
+
+kp1 = kp_list[0]
+kp2 = kp_list[1]
+
+des1 = feature_list[0]
+des2 = feature_list[1]
+bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+matches = bf.match(des1, des2)
+matches = sorted(matches, key=lambda x: x.distance)
+
+img3 = cv2.drawMatches(img_color1,kp1, img_color2, kp2, matches[0:30], None,flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+plt.imshow(img3)
+plt.show()
+#result, match_dic = feature_match(feature_list)
 
 '''
-Visualizing the result
+#Visualizing the result
+'''
+
 '''
 for idx, each_result in enumerate(result):
     img_set = set()
@@ -173,3 +227,4 @@ for idx, each_result in enumerate(result):
             pos2 = (int(pos2[0]+(i+1)*width), int(pos2[1]))
             cv2.line(concatenated, pos1, pos2, (0, 255, 0), thickness=1, lineType=8)
     cv2.imwrite('result{}.jpg'.format(idx+1), concatenated)
+'''
