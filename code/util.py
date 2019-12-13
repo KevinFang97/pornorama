@@ -32,11 +32,9 @@ def extract_ORB(image_list:List[np.ndarray]):
         else:
             img_gray = each_image
 
-      #  kp = orb.detect(img_gray, None)
         kp, descriptor = orb.detectAndCompute(img_gray, None)
         kp_list.append(kp)
         feature_list.append(descriptor)
-
     return kp_list, feature_list
 
 '''
@@ -134,14 +132,12 @@ def maximum_spanning_tree(graph):
     #Sort the matched feature points number from large to small
     connection_list = sorted(connection_list, key=lambda x: x[2], reverse=True)
     result = []
-
     for each_connection in connection_list:
         if union(each_connection[0], each_connection[1]):
             result.append(each_connection)
             continue
         else:
             break
-
     return result
 
 
